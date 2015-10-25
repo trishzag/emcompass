@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <%= stylesheet_link_tag :application, media: :all %>
+  <%= javascript_include_tag :modernizr %>
+  <%= csrf_meta_tags %>
+</head>
+<body>
+
+  
+
+  <%- flash.each do |key, value| -%>
+    <div class="flash flash-<%= key %>">
+      <%= value %>
+    </div>
+  <%- end -%>
+
+  <%= yield %>
+
+  <%= javascript_include_tag :application %>
+  <%= yield :extra_footer %>
+</body>
+</html>

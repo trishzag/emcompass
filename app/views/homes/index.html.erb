@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <img src="http://i.imgur.com/qMtQTU6.png" width=80%></img>
+    <link href='http://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css' rel='stylesheet' type='text/css'>
+
+  </head>
+  <body>
+      <article id="sticky" class="events-press-cta panel sticky">
+        <div id="menu">
+        <p class="ambulance">Ambulances
+          <ul class="fa-ul">
+            <li><i class="fa-li fa fa-ambulance" color="green"></i>Ambulance 1</li>
+            <li><i class="fa-li fa fa-ambulance"></i>Ambulance 2</li>
+            <li><i class="fa-li fa fa-ambulance"></i>Ambulance 3</li>
+            <li><i class="fa-li fa fa-ambulance"></i>Ambulance 4</li>
+            <li><i class="fa-li fa fa-ambulance"></i>Ambulance 5</li>
+            <li><i class="fa-li fa fa-ambulance"></i>Ambulance 6</li>
+          </ul>
+          </p>
+        <p class="water-rescue">Water Rescue
+          <ul class="fa-ul">
+            <li><i class="fa-li fa fa-ship"></i>Boat 1</li>
+            <li><i class="fa-li fa fa-ship"></i>Boat 2</li>
+            <li><i class="fa-li fa fa-ship"></i>Boat 3</li>
+          </ul>
+        </p>
+        <p class="helicopter">Air EMS
+          <ul class="fa-ul">
+              <li><i class="fa-li fa fa-fighter-jet"></i>Helicopter 1</li>
+              <li><i class="fa-li fa fa-fighter-jet"></i>Helicopter 2</li>
+            </ul>
+            </p>
+      </article>
+    </div>
+    <div id="map-canvas"></div>
+      <style>
+      </style>
+      <script src="https://maps.googleapis.com/maps/api/js"></script>
+      <script src="js/vendor/jquery.js"></script>
+      <script src="js/foundation/foundation.js"></script>
+      <script src="js/foundation/foundation.reveal.js"></script>
+      <script>
+              // necessary variables
+        var map;
+        var infoWindow = [];
+        var $_dragStart = null;
+        var jsonData = '[{"id":"1","latitude":"28.625","longitude":"77.211","price":"0"},{"id":"2","latitude":"28.71","longitude":"77.19","price":"100"}]';
+
+        // markersData variable stores the information necessary to each marker
+        var markersData = [{
+          lat: 42.3636694,
+          lng: -71.0691306,
+          name: "Massachusetts General",
+          waiting: 42,
+          dispo: 12,
+          ambulance: 6,
+          infoWindow: new google.maps.InfoWindow()
+        }, {
+          lat: 42.3261,
+          lng: -71.1493,
+          name: "Brigham and Women's",
+          waiting: 19,
+          dispo: 6,
+          ambulance: 3,
+          infoWindow: new google.maps.InfoWindow()
+        }, {
+          lat: 42.3366,
+          lng: -71.1094,
+          name: "Beth Israel/Deaconess",
+          waiting: 24,
+          dispo: 9,
+          ambulance: 5,
+          infoWindow: new google.maps.InfoWindow()
+        },
+        //  {
+        //   lat: 42.3746152,
+        //   lng: -71.1040774,
+        //   name: "Cambridge City Hospital",
+        //   waiting: 16,
+        //   dispo: 4,
+        //   InfoWindow: new google.maps.InfoWindow()
+        // }
+        // don't insert comma in the last item
+        ];
+
+        function initialize() {
+          var mapOptions = {
+              center: new google.maps.LatLng(42.3601, -71.0589),
+              zoom: 6,
+              mapTypeId: 'roadmap',
+          };
+
+          map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+          // Event that closes the Info Window with a click on the map
+          google.maps.event.addListener(map, 'click', function () {
+              //infoWindow.close();
+          });
+
+          // Finally displayMarkers() function is called to begin the markers creation
+          displayMarkers();
+        }
+
+        google.maps.event.addDomListener(window, 'load', initialize);
+        $(document).ready(function () {
+          //    doLaunch(); // This works
+        });
+
+        // This function will iterate over markersData array
+        // creating markers with createMarker function
+        function displayMarkers() {
+
+          // this variable sets the map bounds according to markers position
+          var bounds = new google.maps.LatLngBounds();
+
+          // for loop traverses markersData array calling createMarker function for each marker
+          for (var i = 0; i < markersData.length; i++) {
+
+              var latlng = new google.maps.LatLng(markersData[i].lat, markersData[i].lng);
+              var name = markersData[i].name;
+              var waiting = markersData[i].waiting;
+              var dispo = markersData[i].dispo;
+              var ambulance = markersData[i].ambulance;
+
+              createMarker(i, latlng, name, waiting, dispo, ambulance);
+
+              // marker position is added to bounds variable
+              bounds.extend(latlng);
+          }
+
+          // Finally the bounds variable is used to set the map bounds
+          // with fitBounds() function
+          map.fitBounds(bounds);
+        }
+
+        // This function creates each marker and it sets their Info Window content
+        function createMarker(i, latlng, name, waiting, dispo, ambulance) {
+          var marker = new google.maps.Marker({
+              map: map,
+              position: latlng,
+              title: name
+          });
+
+          var iwContent = '<div id="iw_container">' +
+              '<div class="iw_title">' + name + '</div>' +
+              '<div class="iw_content">Waiting Room:' + waiting + '<br />' +
+              'Disposition: ' + dispo + '<br />' +
+              'Ambulance: ' + ambulance + '</div></div>';
+
+          // including content to the Info Window.
+          markersData[i].infoWindow.setContent(iwContent);
+          markersData[i].infoWindow.open(map, marker);
+        }
+
+        setInterval(function () {
+          if ($_dragStart == null) {
+              doClear(); // working but no AJAX in there
+              // doRecup(); // not working
+          }
+        }, 5000);
+
+        function doClear() {
+          // This one works fine and there is no AJAX in there
+          // It just empty all the cell of the table
+          console.log('Calling: doClear()');
+        };
+
+        function doLaunch() {
+          console.log('Calling: doLaunch()');
+
+          // ajax call
+          $.ajax({
+              type: 'POST',
+              url: '/echo/json/',
+              contentType: 'application/json; charset=utf-8',
+              dataType: 'json',
+              complete: function () {
+                  console.log('Calling: Ajax Complete doLaunch()');
+                  doRecup(); // working in there
+              },
+              error: ajaxError
+          });
+          // end ajax call
+        };
+
+        function doRecup() {
+          console.log('Calling: doRecup()');
+
+          $.ajax({
+              type: 'POST',
+              url: '/echo/json/',
+              contentType: 'application/json; charset=utf-8',
+              dataType: 'json',
+              data: {
+                  json: jsonData
+              },
+              dataType: 'json',
+              success: function (data) {
+                  console.log('Calling: Ajax Complete doRecup()');
+                  for (var i = 0; i < markersData.length; i++) {
+                      var waiting = markersData[i].waiting + Math.round((Math.random() - .5) * 5);
+                      var dispo = markersData[i].dispo + Math.round((Math.random() - .5) * 3);
+                      var ambulance = markersData[i].ambulance + Math.round((Math.random() - .5) * 2);
+                      var iwContent = '<div id="iw_container">' +
+                          '<div class="iw_title">' + markersData[i].name + '</div>' +
+                          '<div class="iw_content">Waiting Room:' + waiting + '<br />' +
+                          'Disposition: ' + dispo + '<br />' +
+                          'Ambulance: ' + ambulance + '</div></div>';
+
+                      // including content to the Info Window.
+                      markersData[i].infoWindow.setContent(iwContent);
+                  }
+
+                  //$('#status').append(JSON.stringify(data));
+              },
+              error: ajaxError,
+              complete: function () {
+                  console.log("Complete!");
+              }
+          });
+        };
+
+        /**
+        * Custom Ajax Error Method
+        *
+        * @param jqXHR
+        * @param exception
+        * @returns {string}
+        */
+        function ajaxError(jqXHR, exception) {
+          if (jqXHR.status === 0) {
+              alert('Not connected.\nPlease verify your network connection.');
+          } else if (jqXHR.status === 404) {
+              alert('The requested page not found. [404]');
+          } else if (jqXHR.status === 500) {
+              alert('Internal Server Error [500].');
+          } else if (exception === 'parsererror') {
+              alert('Requested JSON parse failed.');
+          } else if (exception === 'timeout') {
+              alert('Time out error.');
+          } else if (exception === 'abort') {
+              alert('Ajax request aborted.');
+          } else {
+              alert('Uncaught Error.\n' + jqXHR.responseText);
+          }
+        }
+      </script>
+  </body>
+</html>
