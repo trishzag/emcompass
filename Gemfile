@@ -54,3 +54,4 @@ gem 'devise'
 gem 'foundation-rails'
 gem 'modernizr-rails'
 gem 'font-awesome-rails'
+gem 'rails_12factor', group: :production
